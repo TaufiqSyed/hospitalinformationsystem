@@ -93,7 +93,6 @@ public class Welcome implements ActionListener {
 		if (src == btnStaff) {
 			StaffDashboardThread staffDash = new StaffDashboardThread();
 			staffDash.start();
-//			staffDash.start();
 		}
 	}
 
