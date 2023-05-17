@@ -1,6 +1,5 @@
-package util;
+package utils;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -9,7 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.RenderingHints;
 
-import javax.swing.Box;
 import javax.swing.JPanel;
 
 public class PanelUtil {
@@ -29,8 +27,8 @@ public class PanelUtil {
 		        //Draws the rounded panel with borders.
 		        graphics.setColor(bgColor);
 		        graphics.fillRoundRect(0, 0, width-1, height-1, arcs.width, arcs.height);//paint background
-		        graphics.setColor(new Color(121, 111, 126));
-		        graphics.drawRoundRect(1, 1, width-3, height-3, arcs.width, arcs.height);//paint border
+		        graphics.setColor(new Color(180, 180, 180));
+		        graphics.drawRoundRect(0, 0, width-1, height-1, arcs.width, arcs.height);//paint border
 			}
 		};
 		result.setBounds(10,10,100,30);

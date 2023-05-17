@@ -1,4 +1,4 @@
-package view;
+package views;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -6,7 +6,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 
-import util.ImageUtil;
+import utils.ImageUtil;
+
 
 import javax.swing.ImageIcon;
 
@@ -22,6 +23,12 @@ import javax.swing.JButton;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 import java.awt.Color;
+
+class StaffDashboardThread extends Thread {
+	public void run() {
+		StaffDashboard.main(null);
+	}
+}
 
 public class Welcome implements ActionListener {
 
@@ -83,23 +90,10 @@ public class Welcome implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		if (src == btnDoctor) {
-			//1. Create the frame.
-			JFrame frame2 = new JFrame("FrameDemo");
-
-			//2. Optional: What happens when the frame closes?
-			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-			//3. Create components and put them in the frame.
-			//...create emptyLabel...
-			frame2.getContentPane().add(new JLabel("emptylabel"), BorderLayout.CENTER);
-
-			//4. Size the frame.
-			frame2.pack();
-
-			//5. Show it.
-			frame2.setVisible(true);
+		if (src == btnStaff) {
+			StaffDashboardThread staffDash = new StaffDashboardThread();
+			staffDash.start();
+//			staffDash.start();
 		}
 	}
 
