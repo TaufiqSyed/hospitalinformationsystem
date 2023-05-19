@@ -1,4 +1,4 @@
-package views;
+package views.pages;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 
 import utils.ImageUtil;
-
+import utils.SeedUtil;
 
 import javax.swing.ImageIcon;
 
@@ -53,6 +53,8 @@ public class Welcome implements ActionListener {
 	}
 
 	private void initialize() {
+		SeedUtil.runAllSeeds();
+		
 		ImageIcon vitalsysIcon = ImageUtil.getIcon("images\\vitalsys.png", 32, 32);
 		ImageIcon doctorIcon = ImageUtil.getIcon("images\\doctoricon.png", 1707/16, 2133/16);
 		ImageIcon staffIcon =  ImageUtil.getIcon("images\\stafficon.png", 2133/16, 2133/16);
