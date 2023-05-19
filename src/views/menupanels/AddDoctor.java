@@ -12,14 +12,14 @@ public class AddDoctor extends JPanel {
 		setBounds(133, 65, 221, 138);
 		setLayout(new GridLayout(0, 2, 0, 0));
 		
-		JLabel lbId = new JLabel("Patient ID:");
+		JLabel lbId = new JLabel("Doctor ID:");
 		add(lbId);
 		
 		txtId = new JTextField();
 		add(txtId);
 		txtId.setColumns(10);
 		
-		JLabel lbName = new JLabel("Patient Name:");
+		JLabel lbName = new JLabel("Doctor Name:");
 		add(lbName);
 		
 		txtName = new JTextField();

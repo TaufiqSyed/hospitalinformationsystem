@@ -34,11 +34,13 @@ import models.VitalSign;
 import utils.ImageUtil;
 import utils.PanelUtil;
 import utils.SeedUtil;
+import views.PatientView;
 import views.menupanels.AddDoctor;
 import views.menupanels.AddPatient;
 import views.menupanels.AddVitalSign;
 import views.menupanels.ChooseFloorNumber;
 import views.menupanels.EditFloor;
+import views.menupanels.FloorStatistics;
 
 import java.awt.Font;
 
@@ -53,7 +55,7 @@ import javax.swing.JOptionPane;
 public class StaffDashboard implements ActionListener {
 
 	private JFrame frame;
-	private JPanel panel, pnlAllPatients, pnlAllDoctors;
+	private JPanel panel, pnlAllPatients, pnlAllDoctors, pnlFloors;
 	private JMenuItem mntmEditFloors, mntmStatistics, mntmAddPatient, mntmImportPatients, mntmReadVitalSigns, mntmImportVitalSigns, mntmAddDoctor;
 	private AddPatient addPatient;
 	private ChooseFloorNumber chooseFloorNumber;
@@ -89,12 +91,10 @@ public class StaffDashboard implements ActionListener {
 			int x = JOptionPane.showOptionDialog(frame.getContentPane(), chooseFloorNumber, "Choose Floor to Edit", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
 			int floorNumber;
 			try {
-				if (x != 0) {
-					chooseFloorNumber.txtFloorNumber.setText("");
-					return;
-				}
 				floorNumber = Integer.parseInt(chooseFloorNumber.txtFloorNumber.getText());
-				if (floorNumber < 1 || floorNumber > HospitalFloors.count) return;
+				if (x != 0 || floorNumber < 1 || floorNumber > HospitalFloors.count) {
+					throw new Exception();
+				}
 			} catch (Exception err) {
 				chooseFloorNumber.txtFloorNumber.setText("");
 				return;
@@ -117,8 +117,28 @@ public class StaffDashboard implements ActionListener {
 			editFloor.txtCapacity.setText("");
 			editFloor.txtSpecialization.setText("");
 
-
-		} else if (src == mntmAddPatient) {
+		} else if (src == mntmStatistics) {
+			String[] options = new String[2];
+			options[0] = "Confirm";
+			options[1] = "Cancel";
+			
+			int x = JOptionPane.showOptionDialog(frame.getContentPane(), chooseFloorNumber, "Choose Floor", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+			int floorNumber;
+			try {
+				floorNumber = Integer.parseInt(chooseFloorNumber.txtFloorNumber.getText());
+				if (x != 0 || floorNumber < 1 || floorNumber > HospitalFloors.count) {
+					throw new Exception();
+				}
+			} catch (Exception err) {
+				chooseFloorNumber.txtFloorNumber.setText("");
+				return;
+			}
+			chooseFloorNumber.txtFloorNumber.setText("");
+			
+			FloorController fc = fcs.get(floorNumber - 1);
+			JOptionPane.showMessageDialog(frame.getContentPane(), new FloorStatistics(fc), "Statistics", JOptionPane.INFORMATION_MESSAGE);
+		}
+		else if (src == mntmAddPatient) {
 			String[] options = new String[2];
 			options[0] = "Confirm";
 			options[1] = "Cancel";
@@ -133,7 +153,7 @@ public class StaffDashboard implements ActionListener {
 					return;
 				}
 				Illness illness = new Illness(addPatient.txtIllness.getText(), floor.getMedicalDepartment());
-				ps.addPatient(new Patient(
+				Patient patient = new Patient(
 						addPatient.txtId.getText(),
 						addPatient.txtName.getText(),
 						addPatient.txtPhysician.getText(),
@@ -142,8 +162,14 @@ public class StaffDashboard implements ActionListener {
 						new ArrayList<Illness>(Arrays.asList(illness)),
 						new ArrayList<VitalSign>(),
 						floor
-				));
-				refreshPatients();
+				);
+				if (floor.getRegisteredPatients().size() >= floor.getCapacity()) {
+					PatientView pv = new PatientController(patient).getView();
+					JOptionPane.showMessageDialog(frame.getContentPane(), pv, "Capacity Exceeded - Patient Printout", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					ps.addPatient(patient);
+					refreshPatients();
+				}
 			}
 			addPatient.txtId.setText("");
 			addPatient.txtName.setText("");
@@ -184,20 +210,58 @@ public class StaffDashboard implements ActionListener {
 			options[1] = "Cancel";
 			int x = JOptionPane.showOptionDialog(frame.getContentPane(), addDoctor, "Add Vital Sign", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
 			if (x == 0) {
-				DoctorService.getInstance().addDoctor(
-						new Doctor(
-								addDoctor.txtId.getText(),
-								addDoctor.txtName.getText(),
-								addDoctor.txtSpecialization.getText()
-						)
+				Doctor d = new Doctor(
+						addDoctor.txtId.getText(),
+						addDoctor.txtName.getText(),
+						addDoctor.txtSpecialization.getText()
 				);
+				DoctorService.getInstance().addDoctor(d);
 				addDoctor.txtId.setText("");
 				addDoctor.txtName.setText("");
 				addDoctor.txtSpecialization.setText("");
+				
+				JPanel creds = new JPanel();
+				creds.setLayout(new BoxLayout(creds, BoxLayout.Y_AXIS));
+				
+				
+//				d.setPassword("password"); for development
+				creds.add(new JLabel("Doctor ID: " + d.getId()));
+				creds.add(new JLabel("Generated Password: " + d.getPassword()));
+				
+				JOptionPane.showMessageDialog(frame.getContentPane(), creds, "Generated Password", JOptionPane.INFORMATION_MESSAGE);
+				
+				d.getPassword();
+				
 				refreshDoctors();
 			}
+		} else if (src == mntmImportPatients) {
+			String[] options = new String[2];
+			options[0] = "Confirm";
+			options[1] = "Cancel";
+			
+			int x = JOptionPane.showOptionDialog(frame.getContentPane(), chooseFloorNumber, "Select Floor to Import Patients", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+			int floorNumber;
+			try {
+				floorNumber = Integer.parseInt(chooseFloorNumber.txtFloorNumber.getText());
+				if (x != 0 || floorNumber < 1 || floorNumber > HospitalFloors.count) {
+					throw new Exception();
+				}
+			} catch (Exception err) {
+				chooseFloorNumber.txtFloorNumber.setText("");
+				return;
+			}
+			chooseFloorNumber.txtFloorNumber.setText("");
+			
+			FloorController fc = fcs.get(floorNumber - 1);
+			
+			PatientService.getInstance().importPatients(fc);
+			refreshPatients();
+		} else if (src == mntmImportVitalSigns) {
+			PatientService.getInstance().importVitalSigns();
+			refreshPatients();
 		}
 	}
+
 	private void refreshPatients() {
 		pnlAllPatients.removeAll();
 		for (Patient p: PatientService.getInstance().getPatients()) {
@@ -213,7 +277,6 @@ public class StaffDashboard implements ActionListener {
 		}
 	}
 	private void initialize() {
-		SeedUtil.runAllSeeds();
 		frame = new JFrame();
 		frame.getContentPane().setBackground(new Color(203, 213, 224));
 		frame.setTitle("VitalSys Information System");
@@ -243,7 +306,7 @@ public class StaffDashboard implements ActionListener {
 		lblAus.setBorder(new EmptyBorder(10, 0, 10, 0));
 		pnlLeftDash.add(lblAus, BorderLayout.NORTH);
 		
-		JPanel pnlFloors = new JPanel();
+		pnlFloors = new JPanel();
 		fcs = new ArrayList<FloorController>();
 		for (Floor f: FloorService.getInstance().getFloors()) {
 			FloorController fc = new FloorController(f);

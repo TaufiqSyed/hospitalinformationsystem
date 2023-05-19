@@ -21,6 +21,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -41,31 +42,33 @@ import utils.ImageUtil;
 import utils.PanelUtil;
 import utils.SeedUtil;
 import views.DoctorView;
+import views.PatientView;
 import views.menupanels.AddDoctor;
 import views.menupanels.AddPatient;
 import views.menupanels.AddVitalSign;
 import views.menupanels.ChooseFloorNumber;
+import views.menupanels.ChoosePatientId;
 import views.menupanels.EditFloor;
+import views.menupanels.FloorStatistics;
 
 public class DoctorDashboard implements ActionListener {
 
 	private JFrame frame;
 	private JPanel panel, pnlAllPatients;
 	private JMenuItem mntmDisplayFloor, mntmLookupPatient, mntmEditProfile;
-	private AddPatient addPatient;
 	private ChooseFloorNumber chooseFloorNumber;
-	private EditFloor editFloor;
-	private AddVitalSign addVitalSign;
+	private ChoosePatientId choosePatientId;
 	private AddDoctor addDoctor;
 	private ArrayList<FloorController> fcs;
 	private Doctor loggedInDoctor;
+	private DoctorController dc;
+	private JScrollPane scrDoctors;
+	private JMenuItem mntmSetPassword;
 	
 	public static void main(String[] args) {
-		SeedUtil.runAllSeeds();
 		try {
 			main(DoctorService.getInstance().getDoctorById("doc12345"));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
@@ -88,6 +91,7 @@ public class DoctorDashboard implements ActionListener {
 	public DoctorDashboard(Doctor d) {
 //		super();
 		loggedInDoctor = d;
+		dc = new DoctorController(loggedInDoctor);
 		initialize();
 	}
 	
@@ -98,7 +102,7 @@ public class DoctorDashboard implements ActionListener {
 			options[0] = "Confirm";
 			options[1] = "Cancel";
 			
-			int x = JOptionPane.showOptionDialog(frame.getContentPane(), chooseFloorNumber, "Choose Floor to Edit", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+			int x = JOptionPane.showOptionDialog(frame.getContentPane(), chooseFloorNumber, "Choose Floor", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
 			int floorNumber;
 			try {
 				if (x != 0) {
@@ -114,23 +118,74 @@ public class DoctorDashboard implements ActionListener {
 			chooseFloorNumber.txtFloorNumber.setText("");
 			
 			FloorController fc = fcs.get(floorNumber - 1);
-			editFloor.lbFloorNameEdit.setText(fc.getName());
-			editFloor.lbFloorNumberEdit.setText(String.format("Floor Number %d", floorNumber));
-			
-			x = JOptionPane.showOptionDialog(frame.getContentPane(), editFloor, "Edit Floor", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
-			try {
-				if (x == 0) {
-					fc.setCapacity(Integer.parseInt(editFloor.txtCapacity.getText()));
-					fc.setName(editFloor.txtSpecialization.getText());
-					fc.updateView();
-				}
-			} catch (Exception err) {
+			JOptionPane.showMessageDialog(frame.getContentPane(), new FloorStatistics(fc), "Statistics", JOptionPane.INFORMATION_MESSAGE);
+
+		} else if (src == mntmEditProfile) {
+			String[] options = new String[2];
+			options[0] = "Confirm";
+			options[1] = "Cancel";
+			int x = JOptionPane.showOptionDialog(frame.getContentPane(), addDoctor, "Edit Profile", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+			if (x == 0) {
+				dc.setId(addDoctor.txtId.getText());
+				dc.setName(addDoctor.txtName.getText());
+				dc.setSpecialization(addDoctor.txtSpecialization.getText());
+				dc.updateView();
+				refreshDoctor();
+				
+				addDoctor.txtId.setText("");
+				addDoctor.txtName.setText("");
+				addDoctor.txtSpecialization.setText("");
 			}
-			editFloor.txtCapacity.setText("");
-			editFloor.txtSpecialization.setText("");
-
-
-		} 
+		} else if (src == mntmLookupPatient) {
+			String[] options = new String[2];
+			options[0] = "Confirm";
+			options[1] = "Cancel";
+			
+			
+			int x = JOptionPane.showOptionDialog(frame.getContentPane(), choosePatientId, "View Patient", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+			String patientId;
+			Patient patient;
+			try {
+				if (x != 0) {
+					choosePatientId.txtPatientId.setText("");
+					return;
+				}
+				patientId = choosePatientId.txtPatientId.getText();
+				patient = PatientService.getInstance().getPatientFromId(patientId);
+			} catch (Exception err) {
+				choosePatientId.txtPatientId.setText("");
+				return;
+			}
+			choosePatientId.txtPatientId.setText("");
+			PatientView pv = new PatientController(patient).getView();
+			JOptionPane.showMessageDialog(frame.getContentPane(), pv, "View Patient", JOptionPane.INFORMATION_MESSAGE);
+		}
+		else if (src == mntmSetPassword) {
+			String[] options = new String[2];
+			options[0] = "Confirm";
+			options[1] = "Cancel";
+			
+			
+			JTextField txtNewPassword = new JTextField();
+			JPanel pnlSetPass = new JPanel();
+			pnlSetPass.setLayout(new GridLayout(2, 0, 0, 0));
+			JLabel lblNewPassword = new JLabel("New Password: ");
+			
+			pnlSetPass.add(lblNewPassword);
+			pnlSetPass.add(txtNewPassword);
+			
+			int x = JOptionPane.showOptionDialog(frame.getContentPane(), pnlSetPass, "Reset Password", 0, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+			
+			if (x == 0) {
+				loggedInDoctor.setPassword(txtNewPassword.getText());
+			}
+			txtNewPassword.setText("");
+		}
+	}
+	private void refreshDoctor() {
+		DoctorView dv = dc.getView();
+		PanelUtil.pad(dv, 0, 0, 20, 0);
+		scrDoctors.setViewportView(dv);
 	}
 	private void refreshPatients() {
 		pnlAllPatients.removeAll();
@@ -140,7 +195,6 @@ public class DoctorDashboard implements ActionListener {
 		}
 	}
 	private void initialize() {
-//		SeedUtil.runAllSeeds();	
 		frame = new JFrame();
 		frame.getContentPane().setBackground(new Color(203, 213, 224));
 		frame.setTitle("VitalSys Information System");
@@ -202,9 +256,6 @@ public class DoctorDashboard implements ActionListener {
 			pnlAllPatients.add(pc.getView());
 		}
 		
-		
-		
-		
 		JPanel pnlLeftDash = new JPanel();
 		pnlLeftDash.setBackground(new Color(0,0,0,0));
 		
@@ -219,18 +270,15 @@ public class DoctorDashboard implements ActionListener {
 		lblDoctors.setFont(new Font("Dialog", Font.BOLD, 15));
 		pnlDoctors.add(lblDoctors, BorderLayout.NORTH);
 		
-		JScrollPane scrDoctors = new JScrollPane();
+		scrDoctors = new JScrollPane();
 		scrDoctors.setBackground(Colors.warningText);
 		pnlDoctors.add(scrDoctors, BorderLayout.CENTER);
 		
 		JPanel pnlAllDoctors = new JPanel();
 		pnlAllDoctors.setLayout(new GridBagLayout());
 		pnlAllDoctors.setBackground(Colors.warning);
-//		scrDoctors.setViewportView(pnlAllDoctors);
-
 		
-		DoctorController dc = new DoctorController(loggedInDoctor);
-		dc.setScale(1.4); dc.updateView();
+		dc.setScale(1.8); dc.updateView();
 		DoctorView dv = dc.getView();
 		PanelUtil.pad(dv, 0, 0, 20, 0);
 		scrDoctors.setViewportView(dv);
@@ -241,8 +289,6 @@ public class DoctorDashboard implements ActionListener {
 		pnlLeftDash.setLayout(new GridLayout(2, 0, 0, 9));
 		pnlLeftDash.add(pnlDoctors);
 		pnlLeftDash.add(pnlPatients);
-//		pnlRightDash.add(pnlDoctors);
-		
 
 		int marginW = 2, marginH = 2, glueW = 1, glueH = 1, x = 0, y = 0;
 		
@@ -264,7 +310,10 @@ public class DoctorDashboard implements ActionListener {
 		
 		mntmDisplayFloor = new JMenuItem("Display Floor Data");
 		mnFloor.add(mntmDisplayFloor);
-		mntmDisplayFloor.addActionListener(this);
+		
+		mntmSetPassword = new JMenuItem("Set Password");
+		mnFloor.add(mntmSetPassword);
+		mntmSetPassword.addActionListener(this);
 		
 		JMenu mnPatients = new JMenu("Patients");
 		menuBar.add(mnPatients);
@@ -281,9 +330,20 @@ public class DoctorDashboard implements ActionListener {
 		mntmEditProfile.addActionListener(this);
 		
 		chooseFloorNumber = new ChooseFloorNumber();
-		editFloor = new EditFloor();
-		addPatient = new AddPatient();
-		addVitalSign = new AddVitalSign();
 		addDoctor = new AddDoctor();
+		choosePatientId = new ChoosePatientId();
+		
+		JPanel creds = new JPanel();
+		creds.setLayout(new BoxLayout(creds, BoxLayout.Y_AXIS));
+		
+		
+//		d.setPassword("password"); for development
+		if (!loggedInDoctor.getLoggedInOnce()) {
+			creds.add(new JLabel("Doctor ID: " + loggedInDoctor.getId()));
+			creds.add(new JLabel("Generated Password: " + loggedInDoctor.getPassword()));
+			
+			JOptionPane.showMessageDialog(frame.getContentPane(), creds, "Generated Password", JOptionPane.INFORMATION_MESSAGE);
+			loggedInDoctor.setLoggedInOnce(true);
+		}
 	}
 }

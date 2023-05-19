@@ -11,17 +11,20 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import constants.Colors;
+import models.Floor;
 import models.Illness;
 import models.Patient;
 import models.VitalSign;
 import utils.ImageUtil;
+import utils.OrdinalUtil;
 import utils.PanelUtil;
 
 public class PatientView extends JPanel {
 	private static final long serialVersionUID = 1L;
-	JLabel lblId, lblNewLabel;
+	JLabel lblId, lblNewLabel, lblNewLabel2;
 	JPanel pnlIllnesses, pnlVitalSigns;
 	String name, id, gender, birthday, physician;
+	Floor registeredFloor;
 	boolean atRisk;
 	ArrayList<VitalSign> vitalSigns;
 	ArrayList<Illness> illnesses;
@@ -38,6 +41,7 @@ public class PatientView extends JPanel {
 		vitalSigns = model.getVitalSigns();
 		illnesses = model.getIllnesses();
 		atRisk = model.anyVitalOutOfRange();
+		registeredFloor = model.getRegisteredFloor();
 	}
 	public void render() {
 		setBackground(
@@ -59,7 +63,7 @@ public class PatientView extends JPanel {
 			pnlPatientInfo.setLayout(new BoxLayout(pnlPatientInfo, BoxLayout.Y_AXIS));
 			
 			lblId = new JLabel(
-					String.format("ID: %s    Gender: %s    DOB: %s", 
+					String.format("ID: %s   Gender: %s   DOB: %s", 
 					id, gender, birthday)
 			);
 			lblId.setBackground(Colors.blue);
@@ -70,6 +74,14 @@ public class PatientView extends JPanel {
 			lblNewLabel.setBackground(Colors.transparent);
 			lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 			pnlPatientInfo.add(lblNewLabel);
+			
+			if (registeredFloor != null) {
+				lblNewLabel2 = new JLabel(String.format("Checked in %s Floor", OrdinalUtil.ordinalize(registeredFloor.getNumber())));
+				lblNewLabel2.setBackground(Colors.transparent);
+				lblNewLabel2.setFont(new Font("Tahoma", Font.PLAIN, 10));
+				pnlPatientInfo.add(lblNewLabel2);
+			}
+			
 			
 			pnlIllnesses = new JPanel();
 			pnlIllnesses.setBackground(Colors.transparent);
@@ -131,9 +143,10 @@ public class PatientView extends JPanel {
 				? Colors.warning
 				: Colors.blue
 		);
-		lblId.setText(String.format("ID: %s    Gender: %s    DOB: %s", 
+		lblId.setText(String.format("ID: %s Gender: %s DOB: %s", 
 					id, gender, birthday));
 		lblNewLabel.setText(String.format("%s (%s)", name, physician));
+		lblNewLabel2.setText(String.format("Checked in %s Floor", OrdinalUtil.ordinalize(registeredFloor.getNumber())));
 
 		int pad = 5;
 		pnlIllnesses.removeAll();

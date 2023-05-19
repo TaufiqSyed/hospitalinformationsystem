@@ -27,7 +27,7 @@ public class SeedUtil {
 				new Patient("b24091994", "Mohamad Adas", "Dr. Mikey Smith", "24/09/1994", "Male", new ArrayList<Illness>(Arrays.asList(new Illness("Arthritis", "Cancerology"), new Illness("Headache", "Dentristology"))), new ArrayList<VitalSign>(Arrays.asList(new VitalSign("KJL", 54), new VitalSign("KLDS", 34))))
 		);
 		ps.addPatient(
-				new Patient("b22342353", "Johnny Bravo", "Dr. John Doe", "12/02/2002", "Female", new ArrayList<Illness>(Arrays.asList(new Illness("Sickness", "Cancerology"), new Illness("Dead", "Dentristology"), new Illness("Idiot", "Dumbness"))), new ArrayList<VitalSign>(Arrays.asList(new VitalSign("KJL", 23), new VitalSign("JKJ", 12))))
+				new Patient("b22342353", "Jill Smith", "Dr. John Doe", "12/02/2002", "Female", new ArrayList<Illness>(Arrays.asList(new Illness("Sickness", "Cancerology"), new Illness("Concussion", "Dentristology"), new Illness("Headache", "Dumbness"))), new ArrayList<VitalSign>(Arrays.asList(new VitalSign("KJL", 23), new VitalSign("JKJ", 12))))
 		);
 	}
 	public static void runFloorSeed() {
@@ -58,7 +58,9 @@ public class SeedUtil {
 	}
 	public static void runDoctorSeed() {
 		DoctorService ds = DoctorService.getInstance();
-		ds.addDoctor(new Doctor("doc12345", "Mike Tyson", "Surgery"));
+		Doctor d = new Doctor("doc12345", "Mike Tyson", "Surgery");
+		d.setPassword("password");
+		ds.addDoctor(d);
 		ds.addDoctor(new Doctor("doc23235", "Muhammad Ali", "Dentist"));
 		ds.addDoctor(new Doctor("doc94324", "George Foreman", "Homeopathy"));
 	}

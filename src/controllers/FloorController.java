@@ -15,6 +15,10 @@ public class FloorController {
 		view = new FloorView(p);
 	}
 	
+	public Floor getModel() {
+		return model;
+	}
+	
 	public FloorView getView() {
 		return view;
 	}

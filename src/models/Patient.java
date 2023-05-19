@@ -31,6 +31,11 @@ public class Patient {
 		this.illnesses = arrayList;
 		this.vitalSigns = arrayList2;
 	}
+	@Override
+	public String toString() {
+		return "Patient [id=" + id + ", name=" + name + ", physician=" + physician + ", gender=" + gender
+				+ ", birthday=" + birthday + ", illnesses=" + illnesses + ", vitalSigns=" + vitalSigns + "]";
+	}
 	public String getId() {
 		return id;
 	}

@@ -24,9 +24,14 @@ import java.awt.Font;
 import javax.swing.SwingConstants;
 import java.awt.Color;
 
-class StaffDashboardThread extends Thread {
+
+class LoginWindowThread extends Thread {
+	private boolean isDoctor;
+	public  LoginWindowThread(boolean isDoctor) {
+		this.isDoctor = isDoctor;
+	}
 	public void run() {
-		StaffDashboard.main(null);
+		LoginWindow.main(isDoctor);
 	}
 }
 
@@ -60,6 +65,8 @@ public class Welcome implements ActionListener {
 		ImageIcon staffIcon =  ImageUtil.getIcon("images\\stafficon.png", 2133/16, 2133/16);
 		
 		frame = new JFrame();
+		frame.setTitle("VitalSys - AUS University Hospital");
+		frame.setIconImage(ImageUtil.getIcon("images\\vitalsys.png", 64, 64).getImage());
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -93,8 +100,12 @@ public class Welcome implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if (src == btnStaff) {
-			StaffDashboardThread staffDash = new StaffDashboardThread();
-			staffDash.start();
+			LoginWindowThread loginThread = new LoginWindowThread(false);
+			loginThread.start();
+		} 
+		else if (src == btnDoctor) {
+			LoginWindowThread loginThread = new LoginWindowThread(true);
+			loginThread.start();
 		}
 	}
 
