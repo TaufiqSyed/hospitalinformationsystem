@@ -1,6 +1,6 @@
 # hospitalinformationsystem
 
-Java Swing Project for CMP 256 - Graphic Design and Programming
+Java Swing Project for CMP 256 - GUI Design and Programming
 
 Group Project with Mohamad Adas
 
